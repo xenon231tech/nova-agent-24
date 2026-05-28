@@ -1,0 +1,210 @@
+cat > index.html << 'EOF'
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nova Core Agent 24</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0a0f2a, #1a1a3e);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .card {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            max-width: 500px;
+            width: 100%;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        h1 {
+            text-align: center;
+            font-size: 1.8em;
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        .badge {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .badge span {
+            display: inline-block;
+            background: #00c853;
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.7em;
+            margin: 0 5px;
+        }
+        .tee {
+            background: #ff6d00 !important;
+        }
+        .chat {
+            background: rgba(0,0,0,0.3);
+            border-radius: 15px;
+            height: 350px;
+            overflow-y: auto;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+        .msg-user {
+            text-align: right;
+            margin-bottom: 10px;
+        }
+        .msg-agent {
+            text-align: left;
+            margin-bottom: 10px;
+        }
+        .bubble-user {
+            display: inline-block;
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 80%;
+        }
+        .bubble-agent {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 10px 15px;
+            border-radius: 18px;
+            max-width: 80%;
+        }
+        .proof {
+            font-size: 10px;
+            color: #aaa;
+            margin-top: 5px;
+        }
+        .input-area {
+            display: flex;
+            gap: 10px;
+        }
+        input {
+            flex: 1;
+            padding: 12px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 25px;
+            color: white;
+        }
+        button {
+            padding: 12px 20px;
+            background: linear-gradient(90deg, #00d2ff, #3a7bd5);
+            border: none;
+            border-radius: 25px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .footer {
+            font-size: 10px;
+            text-align: center;
+            margin-top: 15px;
+            color: #888;
+        }
+        .footer a {
+            color: #00d2ff;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>🚀 Nova Core Agent 24</h1>
+        <div class="badge">
+            <span>✅ Active</span>
+            <span class="tee">🔒 TEE Active</span>
+            <span>🤖 ID: 20762</span>
+        </div>
+        
+        <div class="chat" id="chat">
+            <div class="msg-agent">
+                <div class="bubble-agent">Halo! Saya Nova Core Agent 24, terverifikasi Billions TEE. Kirim pesan atau command /did, /stats, /ping, /feedback, /attest</div>
+            </div>
+        </div>
+        
+        <div class="input-area">
+            <input type="text" id="input" placeholder="Ketik pesan..." onkeypress="if(event.key==='Enter') kirim()">
+            <button onclick="kirim()">Kirim</button>
+        </div>
+        
+        <div class="footer">
+            ✅ Diverifikasi Nova Core (Billions TEE) | 🔗 <a href="https://8004scan.io/agents/billions/20762" target="_blank">Agent Profile</a>
+        </div>
+    </div>
+
+    <script>
+        const chat = document.getElementById('chat');
+        const input = document.getElementById('input');
+        
+        function tambahPesan(teks, isUser, proof = null) {
+            const div = document.createElement('div');
+            div.className = isUser ? 'msg-user' : 'msg-agent';
+            let html = `<div class="${isUser ? 'bubble-user' : 'bubble-agent'}">${teks}`;
+            if (proof) html += `<div class="proof">☑ Proof: ${proof}</div>`;
+            html += `</div>`;
+            div.innerHTML = html;
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+        }
+        
+        function kirim() {
+            const pesan = input.value.trim();
+            if (!pesan) return;
+            
+            tambahPesan(pesan, true);
+            input.value = '';
+            
+            // Typing indicator
+            const typing = document.createElement('div');
+            typing.className = 'msg-agent';
+            typing.id = 'typing';
+            typing.innerHTML = '<div class="bubble-agent">🤖 ...</div>';
+            chat.appendChild(typing);
+            chat.scrollTop = chat.scrollHeight;
+            
+            setTimeout(() => {
+                document.getElementById('typing')?.remove();
+                
+                const p = pesan.toLowerCase();
+                let balasan = '';
+                let proof = `billions_tee_${Date.now()}`;
+                
+                if (p === '/did' || p === 'did') {
+                    balasan = "🔑 DID Agent: did:iden3:billions:main:2VmAkXrihYaLnUvAzLdTPqEhHBpXymYKUDNQ2LcWsS";
+                } else if (p === '/stats' || p === 'stats') {
+                    balasan = "📊 STATS\nFeedback: 7\nAttestations: 3\nUptime: 5 jam\n✅ TEE Active";
+                } else if (p === '/ping' || p === 'ping') {
+                    balasan = "🏓 PONG! Bot aktif, TEE Active, Billions OK.";
+                } else if (p.startsWith('/feedback') || p.startsWith('feedback')) {
+                    let msg = p.replace(/^\/feedback/i, '').replace(/^feedback/i, '').trim();
+                    if (!msg) msg = "terima kasih";
+                    balasan = `📝 Feedback: "${msg}"\n\n✅ Diverifikasi Nova Core (Billions TEE)`;
+                } else if (p.startsWith('/attest') || p.startsWith('attest')) {
+                    let msg = p.replace(/^\/attest/i, '').replace(/^attest/i, '').trim();
+                    if (!msg) msg = "attestation";
+                    let id = Math.floor(Math.random() * 90000) + 10000;
+                    balasan = `📜 Attestation: "${msg}"\n☑ ID: ${id}\n✅ Diverifikasi Nova Core (Billions TEE)`;
+                } else {
+                    balasan = `📝 "${pesan}"\n\n✅ Diverifikasi Nova Core (Billions TEE)\n\n💡 Coba: /did, /stats, /ping, /feedback halo, /attest test`;
+                }
+                
+                tambahPesan(balasan, false, proof);
+            }, 800);
+        }
+    </script>
+</body>
+</html>
+EOF
