@@ -9,6 +9,11 @@
 // bodyParser must stay off: the HMAC is verified over the RAW request body.
 'use strict';
 
+// Vercel functions are read-only except /tmp: keep the idempotency state
+// (state.json / decisions.jsonl) there. Must be set before requiring the
+// handler, which reads STATE_DIR at load time.
+if (process.env.VERCEL === '1') process.env.STATE_DIR = process.env.STATE_DIR || '/tmp';
+
 const { processRequest } = require('../lib/handler');
 
 function send(res, status, body, signature) {

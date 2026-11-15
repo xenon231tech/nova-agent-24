@@ -26,7 +26,24 @@ const { keccak_256 } = require('js-sha3');
 const HMAC_SECRET = process.env.AGENT_GAMES_HMAC_SECRET || '';
 const TASKID_MODE = process.env.TASKID_MODE || 'keccak';
 const SIGNATURE_FORMAT = process.env.SIGNATURE_FORMAT || 'sha256';
-const RAPIDSNARK = process.env.RAPIDSNARK || path.join(__dirname, '..', 'bin', 'rapidsnark');
+const RAPIDSNARK_SRC = process.env.RAPIDSNARK || path.join(__dirname, '..', 'bin', 'rapidsnark');
+let rapidsnarkPath = null;
+function getRapidsnark() {
+  if (rapidsnarkPath) return rapidsnarkPath;
+  // On Vercel the bundle dir is read-only and the exec bit may not survive
+  // the build; copy the prover to /tmp once per instance and exec that copy.
+  if (process.env.VERCEL === '1') {
+    const dst = path.join(os.tmpdir(), 'rapidsnark');
+    if (!fs.existsSync(dst)) {
+      fs.copyFileSync(RAPIDSNARK_SRC, dst);
+      fs.chmodSync(dst, 0o755);
+    }
+    rapidsnarkPath = dst;
+    return dst;
+  }
+  rapidsnarkPath = RAPIDSNARK_SRC;
+  return RAPIDSNARK_SRC;
+}
 const WASM = path.join(__dirname, '..', 'gatekeeper.wasm');
 const ZKEY = path.join(__dirname, '..', 'gatekeeper_final.zkey');
 const VK_PATH = path.join(__dirname, '..', 'verification_key.json');
@@ -148,7 +165,7 @@ async function generateProof(input, decision, taskId) {
     fs.writeFileSync(inputPath, JSON.stringify(circuitInput));
     const t0 = Date.now();
     await snarkjs.wtns.calculate(JSON.parse(fs.readFileSync(inputPath, 'utf8')), WASM, witnessPath);
-    await execFileAsync(RAPIDSNARK, [ZKEY, witnessPath, proofPath, publicPath], { timeout: 45000 });
+    await execFileAsync(getRapidsnark(), [ZKEY, witnessPath, proofPath, publicPath], { timeout: 45000 });
     const proof = JSON.parse(fs.readFileSync(proofPath, 'utf8'));
     const publicSignals = JSON.parse(fs.readFileSync(publicPath, 'utf8'));
     const ok = await snarkjs.groth16.verify(await loadVk(), publicSignals, proof);
