@@ -6,7 +6,7 @@
 
 # 🧠 Nova Core Agent 24
 
-Website interaktif untuk Nova Core Agent terverifikasi di Billions TEE
+Website interaktif untuk Nova Core Agent 24
 
 ## 🌟 Features
 
