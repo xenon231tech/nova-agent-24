@@ -17,7 +17,7 @@ export const CONFIG = {
   /** taskId -> field element mapping: "keccak" (default) | "numeric" | "raw". */
   taskIdMode: (process.env.TASKID_MODE || "keccak") as "keccak" | "numeric" | "raw",
   /** Response signature format: "sha256" ("sha256=<hex>", default) | "bare" ("<hex>"). */
-  signatureFormat: (process.env.SIGNATURE_FORMAT || "sha256") as "sha256" | "bare",
+  signatureFormat: (process.env.SIGNATURE_FORMAT || "bare") as "sha256" | "bare", // bare: the platform verifies response signatures against raw hex (v1 proved this; "sha256=" fails its preflight)
   /** Kurier API key (mainnet). Unset = skip Kurier, rely on local verification (logged). */
   kurierApiKey: process.env.KURIER_API_KEY || "",
   /** Kurier base URL. Default is mainnet; override for testnet. */
