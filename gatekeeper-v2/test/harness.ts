@@ -156,9 +156,21 @@ async function main(): Promise<void> {
     JSON.stringify(pre.json),
   );
 
-  // 0b. Bad signature rejected
-  const bad = await post("/agent", { type: "agent-games.preflight.v1" }, true);
-  check("bad HMAC -> 401", bad.status === 401, `status=${bad.status}`);
+  // 0b. Unsigned preflight is still answered (signed): the platform's
+  // dashboard diagnostic sends preflight WITHOUT a signature; auth is the
+  // SIGNED response. A bad signature on a TASK must still 401.
+  const unsignedBody = JSON.stringify({ type: "agent-games.preflight.v1", agent_id: "agt_test", issued_at: new Date().toISOString(), nonce: "unsigned1" });
+  const unsignedRes = await fetch(BASE + "/agent", { method: "POST", headers: { "Content-Type": "application/json" }, body: unsignedBody });
+  const unsignedText = await unsignedRes.text();
+  let unsignedJson: Record<string, unknown> | null = null;
+  try { unsignedJson = JSON.parse(unsignedText) as Record<string, unknown>; } catch { /* ignore */ }
+  check(
+    "unsigned preflight -> 200 signed {ok:true, protocolVersion:v1}",
+    unsignedRes.status === 200 && !!unsignedJson && unsignedJson.ok === true && unsignedJson.protocolVersion === "v1" && signCheck(unsignedText, unsignedRes.headers.get("x-agent-games-signature")),
+    `status=${unsignedRes.status}`,
+  );
+  const badTask = await post("/agent", envelope(runId("gk_test_badsig"), { ...CASES[0].input }), true);
+  check("bad HMAC on task -> 401", badTask.status === 401, `status=${badTask.status}`);
 
   for (const c of CASES) {
     const t0 = Date.now();

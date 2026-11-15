@@ -146,10 +146,7 @@ export async function processRequest(
   if (!CONFIG.hmacSecret) {
     return respond(500, { error: "server misconfigured: missing HMAC secret" }, false);
   }
-  if (!verifySignature(rawBody, signatureHeader)) {
-    console.error(JSON.stringify({ event: "bad_signature" }));
-    return respond(401, { error: "invalid signature" }, false);
-  }
+  const sigOk = verifySignature(rawBody, signatureHeader);
   let envelope: GatekeeperEnvelope;
   try {
     envelope = JSON.parse(rawBody.toString("utf8")) as GatekeeperEnvelope;
@@ -157,10 +154,22 @@ export async function processRequest(
     return respond(400, { error: "invalid json" });
   }
 
+  // Preflight is a liveness check, NOT a scored decision: the platform sends
+  // it unsigned (verified 2026-11-16: the dashboard preflight diagnostic
+  // fails with 401 while a signed preflight of our own passes). Answer it
+  // signed regardless — authentication is the SIGNED response, which the
+  // platform verifies against the HMAC secret. Never approve anything here.
+  if (envelope.type === "agent-games.preflight.v1") {
+    return respond(200, { ok: true, protocolVersion: "v1" });
+  }
+  // Everything else (gatekeeper tasks) stays fail-closed: a valid request
+  // signature is required BEFORE any decision or proof work.
+  if (!sigOk) {
+    console.error(JSON.stringify({ event: "bad_signature" }));
+    return respond(401, { error: "invalid signature" }, false);
+  }
+
   try {
-    if (envelope.type === "agent-games.preflight.v1") {
-      return respond(200, { ok: true, protocolVersion: "v1" });
-    }
     if (envelope.type === "agent-games.proof-gatekeeper.v1") {
       const t0 = Date.now();
       // Whole-task budget: the earlier of the envelope deadline and our 50s cap.
