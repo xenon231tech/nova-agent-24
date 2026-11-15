@@ -1,0 +1,12 @@
+.env
+.env.local
+state.json
+decisions.jsonl
+node_modules/
+dist/
+*.tmp
+# Binary artifacts are downloaded at build time (scripts/fetch-artifacts.sh)
+# and never committed. verification_key.json (text) IS committed.
+circuits/gatekeeper.wasm
+circuits/gatekeeper_final.zkey
+bin/rapidsnark
