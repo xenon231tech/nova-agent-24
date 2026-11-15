@@ -1,0 +1,1 @@
+{"$schema":"https://openapi.vercel.sh/vercel.json","functions":{"api/agent.js":{"includeFiles":"gatekeeper.wasm, gatekeeper_final.zkey, verification_key.json, bin/rapidsnark"}}}
