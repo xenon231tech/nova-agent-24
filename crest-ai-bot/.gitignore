@@ -1,0 +1,8 @@
+config.json
+*.log
+__pycache__/
+*.pyc
+alerts.json
+portfolio.json
+history.json
+notes.json
