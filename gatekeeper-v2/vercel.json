@@ -1,0 +1,1 @@
+{"$schema":"https://openapi.vercel.sh/vercel.json","functions":{"api/agent.ts":{"includeFiles":"circuits/gatekeeper.wasm, circuits/gatekeeper_final.zkey, circuits/verification_key.json, bin/rapidsnark","maxDuration":60}}}
