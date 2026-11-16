@@ -149,6 +149,18 @@ export async function generateProof(
       publicSignals = full.publicSignals;
     }
 
+    // Normalize to a complete snarkjs proof object. rapidsnark's proof.json
+    // omits `curve`, and the platform's live (strict) verifier requires the
+    // full snarkjs shape { pi_a, pi_b, pi_c, protocol, curve }. The practice
+    // verifier accepts the bare rapidsnark shape, which is why this only
+    // showed up as proof_failure in live rounds (R03/R04) while practice
+    // proofs verified. Local snarkjs.verify ignores `curve`, so this is safe.
+    if (proof && typeof proof === "object") {
+      const p = proof as Record<string, unknown>;
+      if (!p.protocol) p.protocol = "groth16";
+      if (!p.curve) p.curve = "bn128";
+    }
+
     const ok = await snarkjs.groth16.verify(await loadVk(), publicSignals, proof);
     if (!ok) throw new Error("local proof verification failed");
     console.log(JSON.stringify({ event: "proof_ok", task_id: String(taskId), ms: Date.now() - t0 }));
