@@ -14,8 +14,8 @@ export const CONFIG = {
   hmacSecret: process.env.AGENT_GAMES_HMAC_SECRET || "",
   /** Port for the standalone server (server.ts). Vercel ignores this. */
   port: parseInt(process.env.PORT || "3000", 10),
-  /** taskId -> field element mapping: "keccak" (default) | "numeric" | "raw". */
-  taskIdMode: (process.env.TASKID_MODE || "keccak") as "keccak" | "numeric" | "raw",
+  /** taskId -> field element mapping: "uuidTail" (default) | "keccak" | "numeric" | "raw". */
+  taskIdMode: (process.env.TASKID_MODE || "uuidTail") as "uuidTail" | "keccak" | "numeric" | "raw",
   /** Response signature format: "sha256" ("sha256=<hex>", default) | "bare" ("<hex>"). */
   signatureFormat: (process.env.SIGNATURE_FORMAT || "bare") as "sha256" | "bare", // bare: the platform verifies response signatures against raw hex (v1 proved this; "sha256=" fails its preflight)
   /** Kurier API key (mainnet). Unset = skip Kurier, rely on local verification (logged). */
